@@ -6,20 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="dns-prefetch" href="https://beoriginalh.github.io">
-  <title>Redis持久化：AOF | siyang&#39;s blog</title>
+  <title>Redis持久化：RDB | siyang&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="什么是AOF持久化Redis有两种持久化方式，RDB和AOF。RDB是将Redis中的数据保存一份到RDB文件中，而AOF不是保存键值对数据，而是保存服务器执行的写命令来记录数据库的状态。">
+  <meta name="description" content="什么是RDB持久化RDB持久化是Redis的持久化方式之一，也被称为快照持久化，是将某一个时间节点的Redis内存中数据保存到磁盘上，生成一个RDB文件。之后，用户可以将这份文件进行备份，复制到其他的服务器上创建具有相同状态的Redis服务器副本，也可以用于服务器重启恢复到原来的状态。">
 <meta name="keywords" content="Redis">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Redis持久化：AOF">
-<meta property="og:url" content="https://beoriginalh.github.io/2019/04/20/Redis持久化：AOF/index.html">
+<meta property="og:title" content="Redis持久化：RDB">
+<meta property="og:url" content="https://beoriginalh.github.io/2018/05/01/Redis持久化：RDB/index.html">
 <meta property="og:site_name" content="siyang&#39;s blog">
-<meta property="og:description" content="什么是AOF持久化Redis有两种持久化方式，RDB和AOF。RDB是将Redis中的数据保存一份到RDB文件中，而AOF不是保存键值对数据，而是保存服务器执行的写命令来记录数据库的状态。">
+<meta property="og:description" content="什么是RDB持久化RDB持久化是Redis的持久化方式之一，也被称为快照持久化，是将某一个时间节点的Redis内存中数据保存到磁盘上，生成一个RDB文件。之后，用户可以将这份文件进行备份，复制到其他的服务器上创建具有相同状态的Redis服务器副本，也可以用于服务器重启恢复到原来的状态。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-05-06T08:32:24.000Z">
+<meta property="og:updated_time" content="2019-05-06T08:55:51.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Redis持久化：AOF">
-<meta name="twitter:description" content="什么是AOF持久化Redis有两种持久化方式，RDB和AOF。RDB是将Redis中的数据保存一份到RDB文件中，而AOF不是保存键值对数据，而是保存服务器执行的写命令来记录数据库的状态。">
+<meta name="twitter:title" content="Redis持久化：RDB">
+<meta name="twitter:description" content="什么是RDB持久化RDB持久化是Redis的持久化方式之一，也被称为快照持久化，是将某一个时间节点的Redis内存中数据保存到磁盘上，生成一个RDB文件。之后，用户可以将这份文件进行备份，复制到其他的服务器上创建具有相同状态的Redis服务器副本，也可以用于服务器重启恢复到原来的状态。">
   
   
     <link rel="icon" href="/img/header.jpeg">
@@ -133,44 +133,45 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-Redis持久化：AOF" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-Redis持久化：RDB" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      Redis持久化：AOF
+      Redis持久化：RDB
     </h1>
   
 
         
-        <a href="/2019/04/20/Redis持久化：AOF/" class="archive-article-date">
-  	<time datetime="2019-04-20T12:09:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-20</time>
+        <a href="/2018/05/01/Redis持久化：RDB/" class="archive-article-date">
+  	<time datetime="2018-05-01T12:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-05-01</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="什么是AOF持久化"><a href="#什么是AOF持久化" class="headerlink" title="什么是AOF持久化"></a>什么是AOF持久化</h3><p>Redis有两种持久化方式，RDB和AOF。RDB是将Redis中的数据保存一份到RDB文件中，而AOF不是保存键值对数据，而是保存服务器执行的写命令来记录数据库的状态。</p>
+        <h3 id="什么是RDB持久化"><a href="#什么是RDB持久化" class="headerlink" title="什么是RDB持久化"></a>什么是RDB持久化</h3><p>RDB持久化是Redis的持久化方式之一，也被称为快照持久化，是将某一个时间节点的Redis内存中数据保存到磁盘上，生成一个RDB文件。之后，用户可以将这份文件进行备份，复制到其他的服务器上创建具有相同状态的Redis服务器副本，也可以用于服务器重启恢复到原来的状态。</p>
 <a id="more"></a>
-<h3 id="AOF持久化的实现原理"><a href="#AOF持久化的实现原理" class="headerlink" title="AOF持久化的实现原理"></a>AOF持久化的实现原理</h3><p>AOF持久化的实现可以分为三个步骤：命令追加、文件写入、文件同步。</p>
-<h5 id="命令追加"><a href="#命令追加" class="headerlink" title="命令追加"></a>命令追加</h5><p>当Redis的AOF持久化功能打开之后，服务器在执行完一个写入命令后，将会以协议格式将被写入的命令追加到服务器的aof_buf缓存区的末尾。打开AOF持久化的设置在redis.conf中，配置项如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 默认是没有打开的，设置为yes则为打开状态</span><br><span class="line">appendonly no</span><br></pre></td></tr></table></figure>
-<h5 id="文件写入和同步"><a href="#文件写入和同步" class="headerlink" title="文件写入和同步"></a>文件写入和同步</h5><p>服务器每次结束一个事件循环之前，服务器就会调用flushAppendOlnyFile函数，判断是否需要将aof_buf中的内容写入AOF文件中。flushAppendOlnyFile函数会根据Redis服务器配置文件中appendfsync的值做不同的处理，配置项在redis.conf中，如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#默认为everysec 可选值还有no、always</span><br><span class="line">appendfsync everysec</span><br></pre></td></tr></table></figure>
-<p>每一个值的含义如下：</p>
+<h3 id="Redis中RDB持久化配置"><a href="#Redis中RDB持久化配置" class="headerlink" title="Redis中RDB持久化配置"></a>Redis中RDB持久化配置</h3><p>在Redis中，可以配置RDB文件保存的目录、RDB文件的名称，还有同步的时机。配置文件为redis.conf，主要的RDB配置如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#保存rdb文件的名称，默认为dump.rdb</span><br><span class="line">dbfilename dump.rdb</span><br><span class="line"></span><br><span class="line"># 保存RDB文件的目录</span><br><span class="line">dir .</span><br><span class="line"></span><br><span class="line">#如果指定的秒数和数据库写操作次数都满足了就将数据库保存,默认就是如下配置，需要设置为其他的配置，修改下面配置即可。        </span><br><span class="line">#   900秒（15分钟）内至少1个key值改变（则进行数据库保存--持久化）    </span><br><span class="line">#   300秒（5分钟）内至少10个key值改变（则进行数据库保存--持久化）    </span><br><span class="line">#   60秒（1分钟）内至少10000个key值改变（则进行数据库保存--持久化）</span><br><span class="line">save 900 1    </span><br><span class="line">save 300 10    </span><br><span class="line">save 60 10000</span><br></pre></td></tr></table></figure>
+<h3 id="Redis生成RDB文件的方式"><a href="#Redis生成RDB文件的方式" class="headerlink" title="Redis生成RDB文件的方式"></a>Redis生成RDB文件的方式</h3><p>Redis有如下几种方式，可以让服务器生成RDB文件：</p>
 <ul>
-<li>no：将aof_buf中的所有内容写入AOF文件，但不对AOF文件进行同步，何时同步需要操作系统决定。</li>
-<li>everysec：将aof_buf中的所有内容写入AOF文件，如果上次同步AOF文件的时间距离现在超过一秒，那么再次对AOF文件进行同步，同步的操作由一个线程专门负责执行。</li>
-<li>always：将aof_buf中的所有内容写入AOF文件并同步AOF文件。<br>不管是哪一种选项，都会将aof_buf缓存区中的内容写到AOF文件中，但是同步的时机不一样，这主要和文件的写入和同步在操作系统中有关。</li>
+<li>客户端向Redis服务器发送BGSAVE命令，Redis服务器会调用fork创建一个子进程，子进程负责将快照写到磁盘上，父进程会继续处理客户端的请求。</li>
+<li>客户端向Redis服务器发送SAVE命令，Redis服务器在接到SAVE命令的时候，会将数据同步到RDB文件中，在此之间，服务器处于阻塞状态，不会处理其他的请求。</li>
+<li>当用户配置了save选项的时候，一旦save选项满足，则会自动调用BGSAVE命令进行持久化操作。</li>
+<li>Redis通过SHUTDOWN命令关闭服务器或者收到标准的TERM信号时，会执行SAVE命令进行持久化。</li>
+<li>当一个Redis服务器连接另一个Redis服务器，并向对方发送SYNC命令来进行一次复制的时候，如果主服务器没有执行BGSAVE操作，或者主服务器不是刚刚执行完BGSAVE操作，那么主服务器就会执行BGSAVE操作。</li>
 </ul>
-<p>关于操作系统中文件的写入和同步：为了提高文件的写入效率，现代计算机操作系统中，当用户调用write函数的时候，会将数据先写入一个缓存区中，等缓存区的大小超过限制或被填满后，才会真正的同步到磁盘中。这种做法虽然高效，但如果在数据写入缓存区但还没有同步到磁盘的时候，计算机停机将会丢失数据。所以操作系统提供了fsync和fdatasync两个同步函数强制同步缓存区中的数据到磁盘中。</p>
-<h3 id="AOF文件的载入和数据还原"><a href="#AOF文件的载入和数据还原" class="headerlink" title="AOF文件的载入和数据还原"></a>AOF文件的载入和数据还原</h3><p>AOF文件中有所有重建数据库数据的写入命令，只需要将命令重新执行一遍即可。具体实现为：由于Redis的写入命令是需要从客户端执行的，所以服务端会创建一个伪客户端，负责执行AOF中的命令。伪客户端将把AOF中的命令一条条的读取出来执行，直到所有的命令执行完成。</p>
-<h3 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h3><p>由于AOF是通过保存写入命令来实现持久化的，每次写入的命令都会存到文件中，随着时间的流逝，AOF文件会越来越大，以至于AOF文件载入的时候非常的耗时。所以Redis提供了一个AOF重写的功能，使用重写后的文件来代替原来的AOF文件。</p>
-<h5 id="重写的原理"><a href="#重写的原理" class="headerlink" title="重写的原理"></a>重写的原理</h5><p>Redis会从数据库中读取键现在的值，然后使用一条命令保存这个值，这样就可以保存所有的key的最新的值，并且减小AOF的大小。</p>
-<h4 id="AOF后台重写"><a href="#AOF后台重写" class="headerlink" title="AOF后台重写"></a>AOF后台重写</h4><p>由于重写是比较耗时的，所以Redis将重写的功能放在一个子进程中，这样主进程还可以继续处理客户端的请求。但是，由于在子进程在重写的期间，主进程还在接受写的操作，可能会修改正在重写的数据，造成数据不一致，所以Redis设置了一个重写缓冲区。当Redis服务器执行完一个写命令的时候，会同时将该命令写入AOF缓冲区和AOF重写缓冲区。当进行重写的时候，Redis启用子进程进行AOF重写，Redis服务器继续处理客户端的请求，并将写入的命令放入两个缓冲区中。当子进程完成AOF重写，会向父进程发送一个信号，父进程接收到信号后会调用一个信号处理函数，将AOF重写缓冲区中的数据同步到AOF文件中，并原子性的用新的AOF文件替代旧的AOF文件。整个过程中只有在信号处理函数在处理的时候会阻塞服务器进程。这个就是BGREWRITEAOF命令的实现原理。</p>
+<p>需要注意的是：</p>
+<ul>
+<li>如果在BGSAVE命令执行期间，客户端向服务器发送SAVE命令，服务器会拒绝执行SAVE命令，防止产生竞争条件。</li>
+<li>如果在SAVE命令执行期间，客户端向服务器发送BGSAVE命令，服务器会拒绝执行BGSAVE命令，防止产生竞争条件。</li>
+<li>BGSAVE和GBREWRITEAOF不能同时执行，如果BGSAVE正在执行，客户端发送的BGREWRITEAOF命令将延迟在BGSAVE命令执行完毕再执行。如果是GBREWRITEAOF正在执行，客户端发送的BGSAVE将会被拒绝执行。</li>
+</ul>
+<h3 id="关于Redis载入RDB文件"><a href="#关于Redis载入RDB文件" class="headerlink" title="关于Redis载入RDB文件"></a>关于Redis载入RDB文件</h3><p>当Redis需要读取RDB文件恢复到之前的状态时，在读取RDB文件的整个过程中，Redis都是处于阻塞状态。需要注意的是，如果Redis开启了AOF，服务器会优先读取AOF文件来还原数据库的状态，因为AOF文件的更新频率通常比RDB文件高。</p>
 
       
 
@@ -261,7 +262,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://beoriginalh.github.io/2019/04/20/Redis持久化：AOF/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://beoriginalh.github.io/2018/05/01/Redis持久化：RDB/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -275,9 +276,18 @@
   
 <nav id="article-nav">
   
+    <a href="/2019/04/20/Redis持久化：AOF/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Redis持久化：AOF
+        
+      </div>
+    </a>
   
-    <a href="/2018/05/01/Redis持久化：RDB/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Redis持久化：RDB</div>
+  
+    <a href="/2018/01/29/Jps/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">jps命令详解</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -316,7 +326,7 @@
 <script src="https://jjeejj.github.io/js/gitment.js"></script>
 <script>
 var gitment = new Gitment({
-  id: "https://beoriginalh.github.io/2019/04/20/Redis持久化：AOF/",
+  id: "https://beoriginalh.github.io/2018/05/01/Redis持久化：RDB/",
   owner: 'BeOriginalH',
   repo: 'BeOriginalH.github.io',
   oauth: {
