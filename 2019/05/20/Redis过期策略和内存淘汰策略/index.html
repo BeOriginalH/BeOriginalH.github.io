@@ -8,18 +8,18 @@
   <link rel="dns-prefetch" href="https://beoriginalh.github.io">
   <title>Redis过期策略和内存淘汰策略 | siyang&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Redis处理过期的keyRedis会将每个设置了过期时间的key保存在一个独立的字典中，以后会定期扫描这个字典来删除过期了的key。除了定期扫描删除策略之外，Redis同时采用惰性删除策略，在客户端访问key的时候，Redis会对这个key做过期检查，如果key已过期，则删除这个key。 定期扫描策略redis默认会每秒进行10次过期扫描，过期扫描的时候不会扫描过期字典中所有的key，而是采用一">
+  <meta name="description" content="Redis处理过期的keyRedis会将每个设置了过期时间的key保存在一个独立的字典中，以后会定期扫描这个字典来删除过期了的key。除了定期扫描删除策略之外，Redis同时采用惰性删除策略，在客户端访问key的时候，Redis会对这个key做过期检查，如果key已过期，则删除这个key。">
 <meta name="keywords" content="Redis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis过期策略和内存淘汰策略">
 <meta property="og:url" content="https://beoriginalh.github.io/2019/05/20/Redis过期策略和内存淘汰策略/index.html">
 <meta property="og:site_name" content="siyang&#39;s blog">
-<meta property="og:description" content="Redis处理过期的keyRedis会将每个设置了过期时间的key保存在一个独立的字典中，以后会定期扫描这个字典来删除过期了的key。除了定期扫描删除策略之外，Redis同时采用惰性删除策略，在客户端访问key的时候，Redis会对这个key做过期检查，如果key已过期，则删除这个key。 定期扫描策略redis默认会每秒进行10次过期扫描，过期扫描的时候不会扫描过期字典中所有的key，而是采用一">
+<meta property="og:description" content="Redis处理过期的keyRedis会将每个设置了过期时间的key保存在一个独立的字典中，以后会定期扫描这个字典来删除过期了的key。除了定期扫描删除策略之外，Redis同时采用惰性删除策略，在客户端访问key的时候，Redis会对这个key做过期检查，如果key已过期，则删除这个key。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-05-06T09:27:12.000Z">
+<meta property="og:updated_time" content="2019-05-06T09:28:13.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis过期策略和内存淘汰策略">
-<meta name="twitter:description" content="Redis处理过期的keyRedis会将每个设置了过期时间的key保存在一个独立的字典中，以后会定期扫描这个字典来删除过期了的key。除了定期扫描删除策略之外，Redis同时采用惰性删除策略，在客户端访问key的时候，Redis会对这个key做过期检查，如果key已过期，则删除这个key。 定期扫描策略redis默认会每秒进行10次过期扫描，过期扫描的时候不会扫描过期字典中所有的key，而是采用一">
+<meta name="twitter:description" content="Redis处理过期的keyRedis会将每个设置了过期时间的key保存在一个独立的字典中，以后会定期扫描这个字典来删除过期了的key。除了定期扫描删除策略之外，Redis同时采用惰性删除策略，在客户端访问key的时候，Redis会对这个key做过期检查，如果key已过期，则删除这个key。">
   
   
     <link rel="icon" href="/img/header.jpeg">
@@ -154,6 +154,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h3 id="Redis处理过期的key"><a href="#Redis处理过期的key" class="headerlink" title="Redis处理过期的key"></a>Redis处理过期的key</h3><p>Redis会将每个设置了过期时间的key保存在一个独立的字典中，以后会定期扫描这个字典来删除过期了的key。除了定期扫描删除策略之外，Redis同时采用惰性删除策略，在客户端访问key的时候，Redis会对这个key做过期检查，如果key已过期，则删除这个key。</p>
+<a id="more"></a>
 <h3 id="定期扫描策略"><a href="#定期扫描策略" class="headerlink" title="定期扫描策略"></a>定期扫描策略</h3><p>redis默认会每秒进行10次过期扫描，过期扫描的时候不会扫描过期字典中所有的key，而是采用一种贪心策略：</p>
 <ul>
 <li>每次从过期字典中获取20个key。</li>
@@ -421,11 +422,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">Java监控工具</a>
+                <a href="javascript:void(0)" class="js-tag color1">Redis</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Redis</a>
+                <a href="javascript:void(0)" class="js-tag color4">Java监控工具</a>
               </li>
             
             <div class="clearfix"></div>
