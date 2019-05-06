@@ -8,18 +8,18 @@
   <link rel="dns-prefetch" href="https://beoriginalh.github.io">
   <title>Redis持久化：RDB | siyang&#39;s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="什么是AOF持久化Redis有两种持久化方式，RDB和AOF。RDB是将Redis中的数据保存一份到RDB文件中，而AOF不是保存键值对数据，而是保存服务器执行的写命令来记录数据库的状态。 AOF持久化的实现原理AOF持久化的实现可以分为三个步骤：命令追加、文件写入、文件同步。 命令追加当Redis的AOF持久化功能打开之后，服务器在执行完一个写入命令后，将会以协议格式将被写入的命令追加到服务器的">
+  <meta name="description" content="什么是AOF持久化Redis有两种持久化方式，RDB和AOF。RDB是将Redis中的数据保存一份到RDB文件中，而AOF不是保存键值对数据，而是保存服务器执行的写命令来记录数据库的状态。">
 <meta name="keywords" content="Redis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis持久化：RDB">
 <meta property="og:url" content="https://beoriginalh.github.io/2019/04/20/Redis持久化：AOF/index.html">
 <meta property="og:site_name" content="siyang&#39;s blog">
-<meta property="og:description" content="什么是AOF持久化Redis有两种持久化方式，RDB和AOF。RDB是将Redis中的数据保存一份到RDB文件中，而AOF不是保存键值对数据，而是保存服务器执行的写命令来记录数据库的状态。 AOF持久化的实现原理AOF持久化的实现可以分为三个步骤：命令追加、文件写入、文件同步。 命令追加当Redis的AOF持久化功能打开之后，服务器在执行完一个写入命令后，将会以协议格式将被写入的命令追加到服务器的">
+<meta property="og:description" content="什么是AOF持久化Redis有两种持久化方式，RDB和AOF。RDB是将Redis中的数据保存一份到RDB文件中，而AOF不是保存键值对数据，而是保存服务器执行的写命令来记录数据库的状态。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-05-06T07:59:29.000Z">
+<meta property="og:updated_time" content="2019-05-06T08:01:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis持久化：RDB">
-<meta name="twitter:description" content="什么是AOF持久化Redis有两种持久化方式，RDB和AOF。RDB是将Redis中的数据保存一份到RDB文件中，而AOF不是保存键值对数据，而是保存服务器执行的写命令来记录数据库的状态。 AOF持久化的实现原理AOF持久化的实现可以分为三个步骤：命令追加、文件写入、文件同步。 命令追加当Redis的AOF持久化功能打开之后，服务器在执行完一个写入命令后，将会以协议格式将被写入的命令追加到服务器的">
+<meta name="twitter:description" content="什么是AOF持久化Redis有两种持久化方式，RDB和AOF。RDB是将Redis中的数据保存一份到RDB文件中，而AOF不是保存键值对数据，而是保存服务器执行的写命令来记录数据库的状态。">
   
   
     <link rel="icon" href="/img/header.jpeg">
@@ -154,6 +154,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h3 id="什么是AOF持久化"><a href="#什么是AOF持久化" class="headerlink" title="什么是AOF持久化"></a>什么是AOF持久化</h3><p>Redis有两种持久化方式，RDB和AOF。RDB是将Redis中的数据保存一份到RDB文件中，而AOF不是保存键值对数据，而是保存服务器执行的写命令来记录数据库的状态。</p>
+<a id="more"></a>
 <h3 id="AOF持久化的实现原理"><a href="#AOF持久化的实现原理" class="headerlink" title="AOF持久化的实现原理"></a>AOF持久化的实现原理</h3><p>AOF持久化的实现可以分为三个步骤：命令追加、文件写入、文件同步。</p>
 <h5 id="命令追加"><a href="#命令追加" class="headerlink" title="命令追加"></a>命令追加</h5><p>当Redis的AOF持久化功能打开之后，服务器在执行完一个写入命令后，将会以协议格式将被写入的命令追加到服务器的aof_buf缓存区的末尾。打开AOF持久化的设置在redis.conf中，配置项如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 默认是没有打开的，设置为yes则为打开状态</span><br><span class="line">appendonly no</span><br></pre></td></tr></table></figure>

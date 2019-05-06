@@ -155,23 +155,9 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h3 id="什么是AOF持久化"><a href="#什么是AOF持久化" class="headerlink" title="什么是AOF持久化"></a>什么是AOF持久化</h3><p>Redis有两种持久化方式，RDB和AOF。RDB是将Redis中的数据保存一份到RDB文件中，而AOF不是保存键值对数据，而是保存服务器执行的写命令来记录数据库的状态。</p>
-<h3 id="AOF持久化的实现原理"><a href="#AOF持久化的实现原理" class="headerlink" title="AOF持久化的实现原理"></a>AOF持久化的实现原理</h3><p>AOF持久化的实现可以分为三个步骤：命令追加、文件写入、文件同步。</p>
-<h5 id="命令追加"><a href="#命令追加" class="headerlink" title="命令追加"></a>命令追加</h5><p>当Redis的AOF持久化功能打开之后，服务器在执行完一个写入命令后，将会以协议格式将被写入的命令追加到服务器的aof_buf缓存区的末尾。打开AOF持久化的设置在redis.conf中，配置项如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 默认是没有打开的，设置为yes则为打开状态</span><br><span class="line">appendonly no</span><br></pre></td></tr></table></figure>
-<h5 id="文件写入和同步"><a href="#文件写入和同步" class="headerlink" title="文件写入和同步"></a>文件写入和同步</h5><p>服务器每次结束一个事件循环之前，服务器就会调用flushAppendOlnyFile函数，判断是否需要将aof_buf中的内容写入AOF文件中。flushAppendOlnyFile函数会根据Redis服务器配置文件中appendfsync的值做不同的处理，配置项在redis.conf中，如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#默认为everysec 可选值还有no、always</span><br><span class="line">appendfsync everysec</span><br></pre></td></tr></table></figure>
-<p>每一个值的含义如下：</p>
-<ul>
-<li>no：将aof_buf中的所有内容写入AOF文件，但不对AOF文件进行同步，何时同步需要操作系统决定。</li>
-<li>everysec：将aof_buf中的所有内容写入AOF文件，如果上次同步AOF文件的时间距离现在超过一秒，那么再次对AOF文件进行同步，同步的操作由一个线程专门负责执行。</li>
-<li>always：将aof_buf中的所有内容写入AOF文件并同步AOF文件。<br>不管是哪一种选项，都会将aof_buf缓存区中的内容写到AOF文件中，但是同步的时机不一样，这主要和文件的写入和同步在操作系统中有关。</li>
-</ul>
-<p>关于操作系统中文件的写入和同步：为了提高文件的写入效率，现代计算机操作系统中，当用户调用write函数的时候，会将数据先写入一个缓存区中，等缓存区的大小超过限制或被填满后，才会真正的同步到磁盘中。这种做法虽然高效，但如果在数据写入缓存区但还没有同步到磁盘的时候，计算机停机将会丢失数据。所以操作系统提供了fsync和fdatasync两个同步函数强制同步缓存区中的数据到磁盘中。</p>
-<h3 id="AOF文件的载入和数据还原"><a href="#AOF文件的载入和数据还原" class="headerlink" title="AOF文件的载入和数据还原"></a>AOF文件的载入和数据还原</h3><p>AOF文件中有所有重建数据库数据的写入命令，只需要将命令重新执行一遍即可。具体实现为：由于Redis的写入命令是需要从客户端执行的，所以服务端会创建一个伪客户端，负责执行AOF中的命令。伪客户端将把AOF中的命令一条条的读取出来执行，直到所有的命令执行完成。</p>
-<h3 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h3><p>由于AOF是通过保存写入命令来实现持久化的，每次写入的命令都会存到文件中，随着时间的流逝，AOF文件会越来越大，以至于AOF文件载入的时候非常的耗时。所以Redis提供了一个AOF重写的功能，使用重写后的文件来代替原来的AOF文件。</p>
-<h5 id="重写的原理"><a href="#重写的原理" class="headerlink" title="重写的原理"></a>重写的原理</h5><p>Redis会从数据库中读取键现在的值，然后使用一条命令保存这个值，这样就可以保存所有的key的最新的值，并且减小AOF的大小。</p>
-<h4 id="AOF后台重写"><a href="#AOF后台重写" class="headerlink" title="AOF后台重写"></a>AOF后台重写</h4><p>由于重写是比较耗时的，所以Redis将重写的功能放在一个子进程中，这样主进程还可以继续处理客户端的请求。但是，由于在子进程在重写的期间，主进程还在接受写的操作，可能会修改正在重写的数据，造成数据不一致，所以Redis设置了一个重写缓冲区。当Redis服务器执行完一个写命令的时候，会同时将该命令写入AOF缓冲区和AOF重写缓冲区。当进行重写的时候，Redis启用子进程进行AOF重写，Redis服务器继续处理客户端的请求，并将写入的命令放入两个缓冲区中。当子进程完成AOF重写，会向父进程发送一个信号，父进程接收到信号后会调用一个信号处理函数，将AOF重写缓冲区中的数据同步到AOF文件中，并原子性的用新的AOF文件替代旧的AOF文件。整个过程中只有在信号处理函数在处理的时候会阻塞服务器进程。这个就是BGREWRITEAOF命令的实现原理。</p>
-
+        
+          <a class="article-more-a" href="/2019/04/20/Redis持久化：AOF/#more">more >></a>
+        
       
 
       
